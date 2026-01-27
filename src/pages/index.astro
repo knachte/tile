@@ -1,0 +1,67 @@
+---
+import { readFileSync } from 'fs';
+
+const sitesFile = readFileSync('./sites.txt', 'utf-8');
+const sites = sitesFile.split('\n').filter(Boolean);
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sites</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f0f0;
+      display: flex; /* Still need flex to center the grid */
+      justify-content: center; /* Horizontally center the grid */
+      min-height: 100vh;
+      margin: 0;
+      flex-direction: column; /* This will make sure the grid takes full width */
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+      max-width: 1200px; /* Give it a max-width */
+      width: 100%; /* Make it take full width up to max-width */
+      margin: auto; /* Vertically center it inside the body now that body is column-flex */
+    }
+    .tile {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+      padding: 1rem;
+      text-decoration: none;
+      color: black;
+      transition: transform 0.2s;
+    }
+    .tile:hover {
+        transform: translateY(-5px);
+    }
+    .tile img {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid">
+    {sites.map(site => {
+      const url = new URL(site);
+      const name = url.hostname.replace('www.', '');
+      const favicon = `https://www.google.com/s2/favicons?sz=64&domain=${url.hostname}`;
+      return (
+        <a href={site} class="tile" target="_blank" rel="noopener noreferrer">
+          <img src={favicon} alt={`Favicon for ${name}`} />
+          <div>{name}</div>
+        </a>
+      )
+    })}
+  </div>
+</body>
+</html>
