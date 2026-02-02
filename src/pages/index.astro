@@ -9,16 +9,12 @@ const sites = sitesFile.split('\n').filter(Boolean);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sites</title>
+  <title>Tile</title>
   <style>
     body {
       font-family: sans-serif;
       background-color: #f0f0f0;
-      display: flex; /* Still need flex to center the grid */
-      justify-content: center; /* Horizontally center the grid */
-      min-height: 100vh;
       margin: 0;
-      flex-direction: column; /* This will make sure the grid takes full width */
     }
     .grid {
       display: grid;
@@ -47,18 +43,43 @@ const sites = sitesFile.split('\n').filter(Boolean);
       height: 32px;
       margin-bottom: 0.5rem;
     }
+    h1 {
+      text-align: center;
+    }
   </style>
 </head>
 <body>
+  <h1>Tile</h1>
   <div class="grid">
     {sites.map(site => {
-      const url = new URL(site);
-      const name = url.hostname.replace('www.', '');
+      let siteUrl, name;
+      const commaIndex = site.indexOf(',');
+      if (commaIndex !== -1) {
+        siteUrl = site.substring(0, commaIndex);
+        name = site.substring(commaIndex + 1);
+      } else {
+        siteUrl = site;
+        name = '';
+      }
+      const url = new URL(siteUrl);
+      let finalName;
+      if (name) {
+        finalName = name;
+      } else {
+        let processedHostname = url.hostname;
+        if (processedHostname.startsWith('www.')) {
+          processedHostname = processedHostname.substring(4);
+        }
+        if (processedHostname.endsWith('.com')) {
+          processedHostname = processedHostname.substring(0, processedHostname.length - 4);
+        }
+        finalName = processedHostname;
+      }
       const favicon = `https://www.google.com/s2/favicons?sz=64&domain=${url.hostname}`;
       return (
-        <a href={site} class="tile" target="_blank" rel="noopener noreferrer">
-          <img src={favicon} alt={`Favicon for ${name}`} />
-          <div>{name}</div>
+        <a href={siteUrl} class="tile" target="_blank" rel="noopener noreferrer">
+          <img src={favicon} alt={`Favicon for ${finalName}`} />
+          <div>{finalName}</div>
         </a>
       )
     })}
