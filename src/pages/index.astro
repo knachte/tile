@@ -43,6 +43,21 @@ for (const line of lines) {
       max-width: 1200px;
       margin-left: auto;
       margin-right: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .group-title .icon {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.3s ease;
+    }
+    .grid-container.collapsed .grid {
+      display: none;
+    }
+    .grid-container.collapsed .icon {
+      transform: rotate(-90deg);
     }
     .grid {
       display: grid;
@@ -77,46 +92,69 @@ for (const line of lines) {
   </style>
 </head>
 <body>
-  {groups.map(group => (
-    <>
-      {group.title && <h2 class="group-title">{group.title}</h2>}
-      {group.sites.length > 0 && (
-        <div class="grid">
-          {group.sites.map(site => {
-            let siteUrl, name;
-            const commaIndex = site.indexOf(',');
-            if (commaIndex !== -1) {
-              siteUrl = site.substring(0, commaIndex);
-              name = site.substring(commaIndex + 1);
-            } else {
-              siteUrl = site;
-              name = '';
+  {groups.map(group => {
+    const gridContent = group.sites.length > 0 && (
+      <div class="grid">
+        {group.sites.map(site => {
+          let siteUrl, name;
+          const commaIndex = site.indexOf(',');
+          if (commaIndex !== -1) {
+            siteUrl = site.substring(0, commaIndex);
+            name = site.substring(commaIndex + 1);
+          } else {
+            siteUrl = site;
+            name = '';
+          }
+          const url = new URL(siteUrl);
+          let finalName;
+          if (name) {
+            finalName = name;
+          } else {
+            let processedHostname = url.hostname;
+            if (processedHostname.startsWith('www.')) {
+              processedHostname = processedHostname.substring(4);
             }
-            const url = new URL(siteUrl);
-            let finalName;
-            if (name) {
-              finalName = name;
-            } else {
-              let processedHostname = url.hostname;
-              if (processedHostname.startsWith('www.')) {
-                processedHostname = processedHostname.substring(4);
-              }
-              if (processedHostname.endsWith('.com')) {
-                processedHostname = processedHostname.substring(0, processedHostname.length - 4);
-              }
-              finalName = processedHostname;
+            if (processedHostname.endsWith('.com')) {
+              processedHostname = processedHostname.substring(0, processedHostname.length - 4);
             }
-            const favicon = `https://www.google.com/s2/favicons?sz=64&domain=${url.hostname}`;
-            return (
-              <a href={siteUrl} class="tile" target="_blank" rel="noopener noreferrer">
-                <img src={favicon} alt={`Favicon for ${finalName}`} />
-                <div>{finalName}</div>
-              </a>
-            )
-          })}
+            finalName = processedHostname;
+          }
+          const favicon = `https://www.google.com/s2/favicons?sz=64&domain=${url.hostname}`;
+          return (
+            <a href={siteUrl} class="tile" target="_blank" rel="noopener noreferrer">
+              <img src={favicon} alt={`Favicon for ${finalName}`} />
+              <div>{finalName}</div>
+            </a>
+          )
+        })}
+      </div>
+    );
+
+    if (group.title) {
+      return (
+        <div class="grid-container collapsed">
+          <h2 class="group-title">
+            {group.title}
+            <svg class="icon" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+            </svg>
+          </h2>
+          {gridContent}
         </div>
-      )}
-    </>
-  ))}
+      );
+    }
+
+    return gridContent;
+  })}
+  <script>
+    document.querySelectorAll('.group-title').forEach(title => {
+      title.addEventListener('click', () => {
+        const container = title.closest('.grid-container');
+        if (container) {
+          container.classList.toggle('collapsed');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
